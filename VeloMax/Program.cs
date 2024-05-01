@@ -1,7 +1,5 @@
-﻿using System;
-using MySql.Data.MySqlClient;
-using Mysqlx.Crud;
-namespace VeloMax
+﻿
+namespace PB_MDD_A2
 {
     class Program
     {
@@ -20,6 +18,8 @@ namespace VeloMax
             //InsertInto(connection, "vendeur");
             DeleteFrom(connection, "vendeur");
 
+            //Helper.GetColumns(connection, "vendeur");
+
             connection.Close();
         }
 
@@ -28,6 +28,7 @@ namespace VeloMax
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="tableName"></param>
+        /// //ajouter un check pour les variables null, plusvérifiier les types
         public static void InsertInto(MySqlConnection connection, string tableName)
         {
             MySqlParameter _table = new MySqlParameter("@table", MySqlDbType.VarChar);
@@ -74,9 +75,10 @@ namespace VeloMax
             reader.Close();
 
             Console.Write("Enter the id of the row you want to delete: ");
-            string id = Console.ReadLine();
+            string idVal = Console.ReadLine();
+            List<string> columns = Helper.GetColumns(connection, tableName);
             MySqlCommand command = connection.CreateCommand();
-            command.CommandText = $"DELETE FROM {tableName} WHERE id = {id};";
+            command.CommandText = $"DELETE FROM {tableName} WHERE {columns[0]} = {idVal};";
             // Handle dependencies
             try
             {
@@ -88,7 +90,7 @@ namespace VeloMax
                 {
                     Console.WriteLine("This row has dependencies in other tables. Deleting those rows as well.");
                     MySqlCommand commandCascade = connection.CreateCommand();
-                    commandCascade.CommandText = $"DELETE FROM {tableName} WHERE id = {id} CASCADE;";
+                    commandCascade.CommandText = $"DELETE FROM {tableName} WHERE {columns[0]} = {idVal} CASCADE;";
                     commandCascade.ExecuteNonQuery();
                 }
                 else
