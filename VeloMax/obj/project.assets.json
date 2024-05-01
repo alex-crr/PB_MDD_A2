@@ -15,6 +15,22 @@
           }
         }
       },
+      "ConsoleAppVisuals/3.5.2": {
+        "type": "package",
+        "dependencies": {
+          "yamldotnet": "15.1.2"
+        },
+        "compile": {
+          "lib/net8.0/ConsoleAppVisuals.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/ConsoleAppVisuals.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Google.Protobuf/3.25.1": {
         "type": "package",
         "compile": {
@@ -527,6 +543,19 @@
           }
         }
       },
+      "YamlDotNet/15.1.2": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/YamlDotNet.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/YamlDotNet.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "ZstdSharp.Port/0.7.1": {
         "type": "package",
         "compile": {
@@ -557,6 +586,26 @@
         "lib/netstandard2.0/BouncyCastle.Cryptography.dll",
         "lib/netstandard2.0/BouncyCastle.Cryptography.xml",
         "packageIcon.png"
+      ]
+    },
+    "ConsoleAppVisuals/3.5.2": {
+      "sha512": "W+BeC33qaPWjift/THBAnysq+C+je5Bgl49ZI3vt599tbW13zLrf0LR2IddWjpeI2TPtjW2KUzoZAqhZSDW/Hg==",
+      "type": "package",
+      "path": "consoleappvisuals/3.5.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.md",
+        "README.md",
+        "consoleappvisuals.3.5.2.nupkg.sha512",
+        "consoleappvisuals.nuspec",
+        "icon.png",
+        "lib/net6.0/ConsoleAppVisuals.dll",
+        "lib/net6.0/ConsoleAppVisuals.xml",
+        "lib/net7.0/ConsoleAppVisuals.dll",
+        "lib/net7.0/ConsoleAppVisuals.xml",
+        "lib/net8.0/ConsoleAppVisuals.dll",
+        "lib/net8.0/ConsoleAppVisuals.xml"
       ]
     },
     "Google.Protobuf/3.25.1": {
@@ -1761,6 +1810,31 @@
         "version.txt"
       ]
     },
+    "YamlDotNet/15.1.2": {
+      "sha512": "qeX0XhzOIcQEvnI5JxnPaIwcINwyY4Qy/LXhSfsdHkFrl9F41AT52UFfy2nIE7kgrhMg+cP7xuS+GtPJhmHmTA==",
+      "type": "package",
+      "path": "yamldotnet/15.1.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "images/yamldotnet.png",
+        "lib/net47/YamlDotNet.dll",
+        "lib/net47/YamlDotNet.xml",
+        "lib/net6.0/YamlDotNet.dll",
+        "lib/net6.0/YamlDotNet.xml",
+        "lib/net7.0/YamlDotNet.dll",
+        "lib/net7.0/YamlDotNet.xml",
+        "lib/net8.0/YamlDotNet.dll",
+        "lib/net8.0/YamlDotNet.xml",
+        "lib/netstandard2.0/YamlDotNet.dll",
+        "lib/netstandard2.0/YamlDotNet.xml",
+        "lib/netstandard2.1/YamlDotNet.dll",
+        "lib/netstandard2.1/YamlDotNet.xml",
+        "yamldotnet.15.1.2.nupkg.sha512",
+        "yamldotnet.nuspec"
+      ]
+    },
     "ZstdSharp.Port/0.7.1": {
       "sha512": "Idgg+mJEyAujqDPzA3APy9dNoyw0YQcNA65GgYjktDRtJ+nvx/hv+J+m6Eax3JJMGEYGy04oc5YNP6ZvQ3Y1vQ==",
       "type": "package",
@@ -1782,6 +1856,7 @@
   },
   "projectFileDependencyGroups": {
     "net8.0": [
+      "ConsoleAppVisuals >= 3.5.2",
       "MySql.Data >= 8.3.0"
     ]
   },
@@ -1827,6 +1902,10 @@
       "net8.0": {
         "targetAlias": "net8.0",
         "dependencies": {
+          "ConsoleAppVisuals": {
+            "target": "Package",
+            "version": "[3.5.2, )"
+          },
           "MySql.Data": {
             "target": "Package",
             "version": "[8.3.0, )"
