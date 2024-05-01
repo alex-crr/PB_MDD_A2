@@ -1861,24 +1861,26 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\alexa\\.nuget\\packages\\": {}
+    "C:\\Users\\Elisabeth\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\alexa\\OneDrive - De Vinci\\A2\\MDD\\PB_MDD_A2\\VeloMax\\VeloMax.csproj",
+      "projectUniqueName": "C:\\Users\\Elisabeth\\OneDrive - De Vinci\\Projet_modé\\VeloMax2\\PB_MDD_A2\\VeloMax\\VeloMax.csproj",
       "projectName": "VeloMax",
-      "projectPath": "C:\\Users\\alexa\\OneDrive - De Vinci\\A2\\MDD\\PB_MDD_A2\\VeloMax\\VeloMax.csproj",
-      "packagesPath": "C:\\Users\\alexa\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\alexa\\OneDrive - De Vinci\\A2\\MDD\\PB_MDD_A2\\VeloMax\\obj\\",
+      "projectPath": "C:\\Users\\Elisabeth\\OneDrive - De Vinci\\Projet_modé\\VeloMax2\\PB_MDD_A2\\VeloMax\\VeloMax.csproj",
+      "packagesPath": "C:\\Users\\Elisabeth\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Elisabeth\\OneDrive - De Vinci\\Projet_modé\\VeloMax2\\PB_MDD_A2\\VeloMax\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\alexa\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Elisabeth\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -1927,7 +1929,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.203/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.204/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

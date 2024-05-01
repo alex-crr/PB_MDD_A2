@@ -8,7 +8,7 @@ namespace PB_MDD_A2
 
 
             // Bien vérifier, via Workbench par exemple, que ces paramètres de connexion sont valides !!!
-            string connectionString = "SERVER=localhost;PORT=3306;DATABASE=velomax;UID=root;PASSWORD=root;";
+            string connectionString = "SERVER=localhost;PORT=3306;DATABASE=velomax2;UID=root;PASSWORD=password;";
             MySqlConnection connection = new MySqlConnection(connectionString);
             connection.Open();
 
@@ -16,7 +16,8 @@ namespace PB_MDD_A2
             command.CommandText = "SELECT distinct marque from location natural join voiture;"; // exemple de requete bien-sur !
 
             //InsertInto(connection, "vendeur");
-            DeleteFrom(connection, "vendeur");
+           // DeleteFrom(connection, "vendeur");
+            Affichetable(connection, "vendeur");
 
             //Helper.GetColumns(connection, "vendeur");
 
@@ -99,5 +100,42 @@ namespace PB_MDD_A2
                 }
             }
         }
+
+        public static void Affichetable(MySqlConnection connection, string tableName)
+{
+    MySqlCommand commandShow = connection.CreateCommand();
+    commandShow.CommandText = $"SELECT * FROM {tableName};";
+    MySqlDataReader reader = commandShow.ExecuteReader();
+    while (reader.Read())
+    {
+        string currentRowAsString = "";
+        for (int i = 0; i < reader.FieldCount; i++)
+        {
+            string valueAsString = reader.GetValue(i).ToString();
+            currentRowAsString += valueAsString + ", ";
+        }
+        Console.WriteLine(currentRowAsString);
+    }
+    reader.Close();
+
+    Console.Write("Enter the id of the row you want to see: ");
+    string idVal = Console.ReadLine();
+    List<string> columns = Helper.GetColumns(connection, tableName);
+    MySqlCommand command = connection.CreateCommand();
+    command.CommandText = $"SELECT * FROM {tableName} WHERE {columns[0]} = @idVal;";
+    command.Parameters.AddWithValue("@idVal", idVal);
+    MySqlDataReader readerTuple = command.ExecuteReader();
+    if (readerTuple.Read())
+    {
+        string currentTupleAsString = "";
+        for (int i = 0; i < readerTuple.FieldCount; i++)
+        {
+            string valueAsString = readerTuple.GetValue(i).ToString();
+            currentTupleAsString += valueAsString + ", ";
+        }
+        Console.WriteLine(currentTupleAsString);
+    }
+    readerTuple.Close();
+}
     }
 }
