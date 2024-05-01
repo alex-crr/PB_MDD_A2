@@ -1,4 +1,6 @@
 ﻿
+using Org.BouncyCastle.Tls;
+
 namespace PB_MDD_A2
 {
     class Program
@@ -6,18 +8,94 @@ namespace PB_MDD_A2
         static void Main(string[] args)
         {
 
+            Window.Open();
+
+            Title title = new Title("VeloMax");
+            Window.AddElement(title);
+            Window.Render(title);
+
+        Login:
+
+            Prompt promptID = new Prompt("Enter your login ID: ");
+            Window.AddElement(promptID);
+            Window.ActivateElement(promptID);
+            var ID = promptID.GetResponse();
+
+            Prompt promptPassword = new Prompt("Enter your password: ");
+            Window.AddElement(promptPassword);
+            Window.ActivateElement(promptPassword);
+            var password = promptPassword.GetResponse();
+
+            MySqlConnection connection;
 
             // Bien vérifier, via Workbench par exemple, que ces paramètres de connexion sont valides !!!
-            string connectionString = "SERVER=localhost;PORT=3306;DATABASE=velomax2;UID=root;PASSWORD=password;";
-            MySqlConnection connection = new MySqlConnection(connectionString);
-            connection.Open();
+            try
+            {
+                string connectionString = $"SERVER=localhost;PORT=3306;DATABASE=velomax;UID={ID?.Value};PASSWORD={password?.Value};";
+                connection = new MySqlConnection(connectionString);
+                connection.Open();
 
-            MySqlCommand command = connection.CreateCommand();
-            command.CommandText = "SELECT distinct marque from location natural join voiture;"; // exemple de requete bien-sur !
+            }
+            catch (MySqlException ex)
+            {
+                Dialog text = new Dialog(
+                    new List<string>()
+                    {
+                        "Login failed.",
+                    },
+                    null,
+                    "retry"
+                    );
+                Window.AddElement(text);
+                Window.ActivateElement(text);
+                goto Login;
+            }
+
+            string[] options = new string[] { "Load from table", "Insert into table", "Delete from table", "Exit" };
+            ScrollingMenu menuMain = new ScrollingMenu(
+                "Please choose an option among those below.",
+                0,
+                Placement.TopCenter,
+                options
+            );
+
+            Window.AddElement(menuMain);
+            Window.ActivateElement(menuMain);
+
+            var response = menuMain.GetResponse();
+            switch (response!.Status)
+            {
+                case Status.Selected:
+                    switch (response?.Value)
+                    {
+                        case 0:
+                            var data = Select(connection, "vendeur");
+                            TableView students =
+                                    new TableView(
+                                        "Students grades",
+                                        Helper.GetColumns(connection, "vendeur"),
+                                        data
+                                    );
+                            Window.AddElement(students);
+                            Window.Render(students);
+
+                            Window.Freeze();
+                            break;
+                    }
+                    break;
+                case Status.Escaped:
+                    break;
+                case Status.Deleted:
+                    break;
+                default:
+                    break;
+            }
+
+
+            Window.Close();
 
             //InsertInto(connection, "vendeur");
-           // DeleteFrom(connection, "vendeur");
-            Affichetable(connection, "vendeur");
+            //DeleteFrom(connection, "vendeur");
 
             //Helper.GetColumns(connection, "vendeur");
 
@@ -101,41 +179,64 @@ namespace PB_MDD_A2
             }
         }
 
-        public static void Affichetable(MySqlConnection connection, string tableName)
-{
-    MySqlCommand commandShow = connection.CreateCommand();
-    commandShow.CommandText = $"SELECT * FROM {tableName};";
-    MySqlDataReader reader = commandShow.ExecuteReader();
-    while (reader.Read())
-    {
-        string currentRowAsString = "";
-        for (int i = 0; i < reader.FieldCount; i++)
+        public static void AfficheTable(MySqlConnection connection, string tableName)
         {
-            string valueAsString = reader.GetValue(i).ToString();
-            currentRowAsString += valueAsString + ", ";
-        }
-        Console.WriteLine(currentRowAsString);
-    }
-    reader.Close();
+            MySqlCommand commandShow = connection.CreateCommand();
+            commandShow.CommandText = $"SELECT * FROM {tableName};";
+            MySqlDataReader reader = commandShow.ExecuteReader();
+            while (reader.Read())
+            {
+                string currentRowAsString = "";
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    string valueAsString = reader.GetValue(i).ToString();
+                    currentRowAsString += valueAsString + ", ";
+                }
+                Console.WriteLine(currentRowAsString);
+            }
+            reader.Close();
 
-    Console.Write("Enter the id of the row you want to see: ");
-    string idVal = Console.ReadLine();
-    List<string> columns = Helper.GetColumns(connection, tableName);
-    MySqlCommand command = connection.CreateCommand();
-    command.CommandText = $"SELECT * FROM {tableName} WHERE {columns[0]} = @idVal;";
-    command.Parameters.AddWithValue("@idVal", idVal);
-    MySqlDataReader readerTuple = command.ExecuteReader();
-    if (readerTuple.Read())
-    {
-        string currentTupleAsString = "";
-        for (int i = 0; i < readerTuple.FieldCount; i++)
-        {
-            string valueAsString = readerTuple.GetValue(i).ToString();
-            currentTupleAsString += valueAsString + ", ";
+            Console.Write("Enter the id of the row you want to see: ");
+            string idVal = Console.ReadLine();
+            List<string> columns = Helper.GetColumns(connection, tableName);
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = $"SELECT * FROM {tableName} WHERE {columns[0]} = @idVal;";
+            command.Parameters.AddWithValue("@idVal", idVal);
+            MySqlDataReader readerTuple = command.ExecuteReader();
+            if (readerTuple.Read())
+            {
+                string currentTupleAsString = "";
+                for (int i = 0; i < readerTuple.FieldCount; i++)
+                {
+                    string valueAsString = readerTuple.GetValue(i).ToString();
+                    currentTupleAsString += valueAsString + ", ";
+                }
+                Console.WriteLine(currentTupleAsString);
+            }
+            readerTuple.Close();
         }
-        Console.WriteLine(currentTupleAsString);
-    }
-    readerTuple.Close();
-}
+
+        public static List<List<string>> Select(MySqlConnection connection, string tableName)
+        {
+            MySqlCommand commandShow = connection.CreateCommand();
+            commandShow.CommandText = $"SELECT * FROM {tableName};";
+            MySqlDataReader reader = commandShow.ExecuteReader();
+
+            List<List<string>> tableData = new List<List<string>>();
+            while (reader.Read())
+            {
+                List<string> rowData = new List<string>();
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    string valueAsString = reader.GetValue(i).ToString();
+                    rowData.Add(valueAsString);
+                }
+                tableData.Add(rowData);
+            }
+            reader.Close();
+            return tableData;
+
+
+        }
     }
 }

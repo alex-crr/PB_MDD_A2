@@ -1,6 +1,5 @@
 use `velomax`;
 
-
 #------------------------------------------------------------
 # Table: vendeur
 #------------------------------------------------------------
@@ -49,6 +48,7 @@ CREATE TABLE if not exists fournisseur(
 
 CREATE TABLE if not exists programme(
         idProgramme Int NOT NULL ,
+        libelle Varchar(40) NOT NULL,
         rabais      Decimal NOT NULL
 	,CONSTRAINT programme_PK PRIMARY KEY (idProgramme)
 );
@@ -186,6 +186,14 @@ CREATE Table if not exists possede(
         CONSTRAINT possede_velo_FK FOREIGN KEY (idVelo) REFERENCES velo(idVelo)
 );
 
+
+INSERT INTO programme (idProgramme, libelle, rabais)
+VALUES
+(1, 'Fidélio', 0.05),
+(2, 'Fidélio Or', 0.08),
+(3, 'Fidélio Platine', 0.1),
+(4, 'Fidélio Max', 0.12);
+
 INSERT INTO vendeur (idVendeur, prenomVendeur, nomVendeur, idMagasin)
 VALUES
     (1, 'Jean', 'Dupont', 1),
@@ -198,8 +206,8 @@ VALUES
     (8, 'Manon', 'Lefevre', 4),
     (9, 'Gabriel', 'Leroy', 5),
     (10, 'Inès', 'Moreau', 5);
-    
-    INSERT INTO Client (idClient, nomClient, adresseClient, creaFidelite, idProgramme)
+
+   INSERT INTO Client (idClient, nomClient, adresseClient, creaFidelite, idProgramme)
 VALUES
     (1, 'Jeanne', '12 rue de la Paix', '2023-01-15', 1),
     (2, 'Pierre', '8 avenue des Champs-Élysées', '2022-05-20', 2),
@@ -211,3 +219,21 @@ VALUES
     (8, 'Alexandre', '9 avenue Victor Hugo', '2023-03-15', 4),
     (9, 'Camille', '14 rue de la Liberté', '2022-08-20', 1),
     (10, 'Charlotte', '18 boulevard Saint-Germain', '2023-12-10', 2);
+
+
+    INSERT INTO fournisseur (SIRET, nomEntreprise, contactEntreprise, adresseEntreprise, libelleEntreprise)
+VALUES
+    (123456789, 'Fournisseur A', 'John Doe', '123 Rue des Fournisseurs', 1),
+    (234567890, 'Fournisseur B', 'Jane Smith', '456 Avenue des Produits', 2),
+    (345678901, 'Fournisseur C', 'Michael Johnson', '789 Boulevard des Approvisionnements', 3),
+    (456789012, 'Fournisseur D', 'Emma Davis', '987 Rue de la Logistique', 4),
+    (567890123, 'Fournisseur E', 'Robert Williams', '654 Avenue de la Distribution', 5);
+
+
+    INSERT INTO commande (idCommande, dateCommande, dateLivraison, idClient)
+VALUES
+    (1, '2024-03-10', '2024-03-15', 1),
+    (2, '2024-03-12', '2024-03-18', 2),
+    (3, '2024-03-15', '2024-03-20', 3),
+    (4, '2024-03-18', '2024-03-25', 4),
+    (5, '2024-03-20', '2024-03-28', 5);
