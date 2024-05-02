@@ -1,10 +1,11 @@
-﻿namespace PB_MDD_A2
+﻿using YamlDotNet.Core;
+
+namespace PB_MDD_A2
 {
     class Program
     {
         static void Main(string[] args)
         {
-
             Window.Open();
 
             Title title = new Title("VeloMax");
@@ -48,16 +49,16 @@
                 goto Login;
             }
 
-            string[] options = new string[] { "Load from table", "Insert into table", "Delete from table", "Exit" };
+            string[] options = new string[] { "Load from table", "Insert into table", "Update from table", "Delete from table", "Exit" };
             ScrollingMenu menuMain = new ScrollingMenu(
                 "Please choose an option among those below.",
                 0,
                 Placement.TopCenter,
                 options
-            );            
+            );
             Window.AddElement(menuMain);
 
-            Main:
+        Main:
             Window.DeactivateAllElements();
             Window.Render(title);
             Window.ActivateElement(menuMain);
@@ -65,70 +66,139 @@
             var response = menuMain.GetResponse();
             Window.DeactivateElement(menuMain);
 
-            string[] tables = Helper.GetTablesName(connection).ToArray();
-            ScrollingMenu menuTables = new ScrollingMenu(
-                "Please choose a table among those below.",
-                0,
-                Placement.TopCenter,
-                tables
-            );
-            Window.AddElement(menuTables);
-            Window.ActivateElement(menuTables);
-
-            var responseTable = menuTables.GetResponse();
-            Window.DeactivateElement(menuTables);
-
             switch (response!.Status)
             {
                 case Status.Selected:
                     {
-                        switch (response?.Value)
+                        switch (response!.Value)
                         {
-                            case 0:
-                                string tableName = tables[responseTable!.Value];
+                            case 0: // Load from table
+                                var responseTable = Helper.ChooseTable(connection);
+                            SeeTable:
+                                string tableName = responseTable.Item1[responseTable!.Item2.Value];
                                 var data = Select(connection, tableName);
                                 var headers = Helper.GetColumnsName(connection, tableName);
 
                                 TableView seeTable = new TableView(tableName, headers, data);
                                 Window.AddElement(seeTable);
+
                                 Window.Render(seeTable);
 
                                 Window.Freeze();
                                 goto Main;
 
-                            case 2:
-                                tableName = tables[responseTable!.Value];
+                            case 1: // Insert into table
+                                responseTable = Helper.ChooseTable(connection);
+                            Insertion:
+                                Prompt promptInsert;
+                                List<string> values = new List<string>();
+                                tableName = responseTable.Item1[responseTable!.Item2.Value];
                                 data = Select(connection, tableName);
                                 headers = Helper.GetColumnsName(connection, tableName);
 
-                                TableSelector selectTable = new TableSelector(tableName, headers, data);
-                                Window.AddElement(selectTable);
-                                Window.ActivateElement(selectTable);
+                                seeTable = new TableView($"Example for {tableName}", headers, new List<List<string>> { data[0].ToList() });
+                                Window.AddElement(seeTable);
+                                Window.Render(seeTable);
+                                foreach (var header in headers)
+                                {
+                                    promptInsert = new Prompt($"Enter value for {header}: ");
 
-                                var responseDelete = selectTable.GetResponse();
-                                DeleteFrom(connection, tableName, data[responseDelete!.Value][0]);
+                                    Window.AddElement(promptInsert);
+                                    Window.ActivateElement(promptInsert);
+                                    values.Add(promptInsert.GetResponse()?.Value?.Replace(",", ".") ?? string.Empty);
+                                }
+                                try
+                                {
+                                    Window.DeactivateElement(seeTable);
+                                    InsertInto(connection, tableName, values);
+                                    goto SeeTable;
+                                }
+                                catch (MySqlException)
+                                {
+                                    Dialog text = new Dialog(
+                                        new List<string>()
+                                        {
+                                            "Insertion failed.",
+                                        },
+                                        null,
+                                        "retry"
+                                        );
+                                    Window.AddElement(text);
+                                    Window.ActivateElement(text);
+                                    goto Insertion;
+                                }
 
-                                Window.Freeze();
-                                goto Main;
+                            case 2:// Alter from table
+                                responseTable = Helper.ChooseTable(connection);
+                            Update:
+                                tableName = responseTable.Item1[responseTable!.Item2.Value];
+                                data = Select(connection, tableName);
+                                headers = Helper.GetColumnsName(connection, tableName);
+
+                                TableSelector selectAlterTable = new TableSelector(tableName, headers, data);
+                                Window.AddElement(selectAlterTable);
+                                Window.ActivateElement(selectAlterTable);
+
+                                var responseAlter = selectAlterTable.GetResponse();
+
+                                var responseColumn = Helper.ChooseColumn(connection, tableName);
+
+                                string columnName = responseColumn.Item1[responseColumn!.Item2.Value];
+                                Prompt promptUpdate = new Prompt($"Enter new value for {columnName}: ");
+                                Window.AddElement(promptUpdate);
+                                Window.ActivateElement(promptUpdate);
+                                var responseUpdate = promptUpdate.GetResponse();
+                                try
+                                {
+                                    Update(connection, tableName, data[responseAlter!.Value][0], columnName, responseUpdate!.Value);
+                                    goto SeeTable;
+                                }
+                                catch (MySqlException)
+                                {
+                                    Dialog text = new Dialog(
+                                        new List<string>()
+                                        {
+                                            "Update failed.",
+                                        },
+                                        null,
+                                        "retry"
+                                        );
+                                    Window.AddElement(text);
+                                    Window.ActivateElement(text);
+                                    goto Update;
+                                }
+                            case 3:// Delete from table
+                                responseTable = Helper.ChooseTable(connection);
+                                tableName = responseTable.Item1[responseTable!.Item2.Value];
+                                data = Select(connection, tableName);
+                                headers = Helper.GetColumnsName(connection, tableName);
+
+                                TableSelector selectDeletionTable = new TableSelector(tableName, headers, data);
+                                Window.AddElement(selectDeletionTable);
+                                Window.ActivateElement(selectDeletionTable);
+
+                                var responseDelete = selectDeletionTable.GetResponse();
+                                if (Helper.ConfirmationMenu("Deleting this row will also delete its dependencies. Do you want to proceed?") == 2) DeleteFrom(connection, tableName, data[responseDelete!.Value][0]);
+
+                                goto SeeTable;
+
+                            default:
+                                goto finish;
                         }
+
+
                     }
-                    break;
                 case Status.Escaped:
                     break;
+
                 case Status.Deleted:
                     break;
                 default:
                     break;
             }
 
-
+        finish:
             Window.Close();
-
-            //InsertInto(connection, "vendeur");
-            //DeleteFrom(connection, "vendeur");
-
-            //Helper.GetColumns(connection, "vendeur");
-
             connection.Close();
         }
 
@@ -138,29 +208,10 @@
         /// <param name="connection"></param>
         /// <param name="tableName"></param>
         /// //ajouter un check pour les variables null, plusvérifiier les types
-        public static void InsertInto(MySqlConnection connection, string tableName)
+        public static void InsertInto(MySqlConnection connection, string tableName, List<string> values)
         {
-            MySqlParameter _table = new MySqlParameter("@table", MySqlDbType.VarChar);
-            _table.Value = tableName;
-
             MySqlCommand command = connection.CreateCommand();
-            command.CommandText = $"SELECT * FROM {tableName} LIMIT 1;";
-            MySqlDataReader reader = command.ExecuteReader();
-            var values = new List<string>();
-            while (reader.Read())
-            {
-                for (int i = 0; i < reader.FieldCount; i++)
-                {
-                    Console.Write($"Enter value for {reader.GetName(i)}: ");
-                    string value = Console.ReadLine();
-                    values.Add($"'{value}'");
-                }
-            }
-            reader.Close();
-
-            string query = $"INSERT INTO {tableName} VALUES ({string.Join(", ", values)});";
-
-            command = connection.CreateCommand();
+            string query = $"INSERT INTO {tableName} VALUES ({string.Join(", ", values.Select(v => $"'{v}'"))});";
             command.CommandText = query;
             command.ExecuteNonQuery();
         }
@@ -191,41 +242,13 @@
             }
         }
 
-        public static void AfficheTable(MySqlConnection connection, string tableName)
+        public static void Update(MySqlConnection connection, string tableName, string idVal, string column, string value)
         {
-            MySqlCommand commandShow = connection.CreateCommand();
-            commandShow.CommandText = $"SELECT * FROM {tableName};";
-            MySqlDataReader reader = commandShow.ExecuteReader();
-            while (reader.Read())
-            {
-                string currentRowAsString = "";
-                for (int i = 0; i < reader.FieldCount; i++)
-                {
-                    string valueAsString = reader.GetValue(i).ToString();
-                    currentRowAsString += valueAsString + ", ";
-                }
-                Console.WriteLine(currentRowAsString);
-            }
-            reader.Close();
-
-            Console.Write("Enter the id of the row you want to see: ");
-            string idVal = Console.ReadLine();
             List<string> columns = Helper.GetColumnsName(connection, tableName);
             MySqlCommand command = connection.CreateCommand();
-            command.CommandText = $"SELECT * FROM {tableName} WHERE {columns[0]} = @idVal;";
-            command.Parameters.AddWithValue("@idVal", idVal);
-            MySqlDataReader readerTuple = command.ExecuteReader();
-            if (readerTuple.Read())
-            {
-                string currentTupleAsString = "";
-                for (int i = 0; i < readerTuple.FieldCount; i++)
-                {
-                    string valueAsString = readerTuple.GetValue(i).ToString();
-                    currentTupleAsString += valueAsString + ", ";
-                }
-                Console.WriteLine(currentTupleAsString);
-            }
-            readerTuple.Close();
+            string query = $"UPDATE {tableName} SET {column} = '{value}' WHERE {columns[0]} = {idVal};";
+            command.CommandText = query;
+            command.ExecuteNonQuery();
         }
 
         public static List<List<string>> Select(MySqlConnection connection, string tableName)
