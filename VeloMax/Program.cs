@@ -1,7 +1,4 @@
-﻿
-using Org.BouncyCastle.Tls;
-
-namespace PB_MDD_A2
+﻿namespace PB_MDD_A2
 {
     class Program
     {
@@ -61,21 +58,34 @@ namespace PB_MDD_A2
 
             Window.AddElement(menuMain);
             Window.ActivateElement(menuMain);
-
+            
             var response = menuMain.GetResponse();
+            Window.DeactivateElement(menuMain);
+
+            string[] tables = Helper.GetTablesName(connection).ToArray();
+            ScrollingMenu menuTables = new ScrollingMenu(
+                "Please choose a table among those below.",
+                0,
+                Placement.TopCenter,
+                tables
+            );
+            Window.AddElement(menuTables);
+            Window.ActivateElement(menuTables);
+            
+            var responseTable = menuTables.GetResponse();
+            Window.DeactivateElement(menuTables);
+
             switch (response!.Status)
             {
                 case Status.Selected:
                     switch (response?.Value)
                     {
                         case 0:
-                            var data = Select(connection, "vendeur");
-                            TableView students =
-                                    new TableView(
-                                        "Students grades",
-                                        Helper.GetColumns(connection, "vendeur"),
-                                        data
-                                    );
+                            string tableName = tables[responseTable!.Value];
+                            var data = Select(connection, tableName);
+                            var headers = Helper.GetColumnsName(connection, tableName);
+
+                            TableView students = new TableView(tableName, headers, data);
                             Window.AddElement(students);
                             Window.Render(students);
 
@@ -155,7 +165,7 @@ namespace PB_MDD_A2
 
             Console.Write("Enter the id of the row you want to delete: ");
             string idVal = Console.ReadLine();
-            List<string> columns = Helper.GetColumns(connection, tableName);
+            List<string> columns = Helper.GetColumnsName(connection, tableName);
             MySqlCommand command = connection.CreateCommand();
             command.CommandText = $"DELETE FROM {tableName} WHERE {columns[0]} = {idVal};";
             // Handle dependencies
@@ -198,7 +208,7 @@ namespace PB_MDD_A2
 
             Console.Write("Enter the id of the row you want to see: ");
             string idVal = Console.ReadLine();
-            List<string> columns = Helper.GetColumns(connection, tableName);
+            List<string> columns = Helper.GetColumnsName(connection, tableName);
             MySqlCommand command = connection.CreateCommand();
             command.CommandText = $"SELECT * FROM {tableName} WHERE {columns[0]} = @idVal;";
             command.Parameters.AddWithValue("@idVal", idVal);
