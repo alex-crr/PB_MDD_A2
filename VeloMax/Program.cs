@@ -54,11 +54,14 @@
                 0,
                 Placement.TopCenter,
                 options
-            );
-
+            );            
             Window.AddElement(menuMain);
+
+            Main:
+            Window.DeactivateAllElements();
+            Window.Render(title);
             Window.ActivateElement(menuMain);
-            
+
             var response = menuMain.GetResponse();
             Window.DeactivateElement(menuMain);
 
@@ -71,26 +74,43 @@
             );
             Window.AddElement(menuTables);
             Window.ActivateElement(menuTables);
-            
+
             var responseTable = menuTables.GetResponse();
             Window.DeactivateElement(menuTables);
 
             switch (response!.Status)
             {
                 case Status.Selected:
-                    switch (response?.Value)
                     {
-                        case 0:
-                            string tableName = tables[responseTable!.Value];
-                            var data = Select(connection, tableName);
-                            var headers = Helper.GetColumnsName(connection, tableName);
+                        switch (response?.Value)
+                        {
+                            case 0:
+                                string tableName = tables[responseTable!.Value];
+                                var data = Select(connection, tableName);
+                                var headers = Helper.GetColumnsName(connection, tableName);
 
-                            TableView students = new TableView(tableName, headers, data);
-                            Window.AddElement(students);
-                            Window.Render(students);
+                                TableView seeTable = new TableView(tableName, headers, data);
+                                Window.AddElement(seeTable);
+                                Window.Render(seeTable);
 
-                            Window.Freeze();
-                            break;
+                                Window.Freeze();
+                                goto Main;
+
+                            case 2:
+                                tableName = tables[responseTable!.Value];
+                                data = Select(connection, tableName);
+                                headers = Helper.GetColumnsName(connection, tableName);
+
+                                TableSelector selectTable = new TableSelector(tableName, headers, data);
+                                Window.AddElement(selectTable);
+                                Window.ActivateElement(selectTable);
+
+                                var responseDelete = selectTable.GetResponse();
+                                DeleteFrom(connection, tableName, data[responseDelete!.Value][0]);
+
+                                Window.Freeze();
+                                goto Main;
+                        }
                     }
                     break;
                 case Status.Escaped:
@@ -145,26 +165,8 @@
             command.ExecuteNonQuery();
         }
 
-        public static void DeleteFrom(MySqlConnection connection, string tableName)
+        public static void DeleteFrom(MySqlConnection connection, string tableName, string idVal)
         {
-            // Show all rows of the table
-            MySqlCommand commandShow = connection.CreateCommand();
-            commandShow.CommandText = $"SELECT * FROM {tableName};";
-            MySqlDataReader reader = commandShow.ExecuteReader();
-            while (reader.Read())
-            {
-                string currentRowAsString = "";
-                for (int i = 0; i < reader.FieldCount; i++)
-                {
-                    string valueAsString = reader.GetValue(i).ToString();
-                    currentRowAsString += valueAsString + ", ";
-                }
-                Console.WriteLine(currentRowAsString);
-            }
-            reader.Close();
-
-            Console.Write("Enter the id of the row you want to delete: ");
-            string idVal = Console.ReadLine();
             List<string> columns = Helper.GetColumnsName(connection, tableName);
             MySqlCommand command = connection.CreateCommand();
             command.CommandText = $"DELETE FROM {tableName} WHERE {columns[0]} = {idVal};";
