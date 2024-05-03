@@ -38,6 +38,23 @@ namespace PB_MDD_A2
             return tables;
         }
 
+        public static string GetId(MySqlConnection connection)
+        {
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = $"select user from information_schema.processlist where id = connection_id();";
+            MySqlDataReader reader = command.ExecuteReader();
+            string id= "";
+            while (reader.Read())
+            {
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    id = reader.GetString(i);
+                }
+            }
+            reader.Close();
+            return id;
+        }
+
         public static int ConfirmationMenu(string message)
         {
             string[] options = new string[] { "No", "Definitely not", "Yes" };

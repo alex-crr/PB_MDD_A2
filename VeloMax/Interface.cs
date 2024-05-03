@@ -6,6 +6,85 @@ namespace PB_MDD_A2
 {
     public class Interface
     {
+        public static void Home(MySqlConnection connection)
+        {
+
+            Window.DeactivateAllElements();
+            Window.Clear();
+
+            Title title = new Title("VeloMax");
+            Window.AddElement(title);
+            Window.Render(title);
+            string[] options = ["Load from table", "See some stuff", "Modify a table", "Demo", "Exit"];
+
+            ScrollingMenu menuMain = new ScrollingMenu(
+                "Please choose an option among those below.",
+                0,
+                Placement.TopCenter,
+                options
+            );
+            Window.AddElement(menuMain);
+            Window.ActivateElement(menuMain);
+
+            var response = menuMain.GetResponse();
+            Window.DeactivateElement(menuMain);
+
+            switch (response!.Status)
+            {
+                case Status.Selected:
+                    {
+                        switch (response!.Value)
+                        {
+                            case 0: // Load from table
+                                var responseTable = ChooseTable(connection);
+                                SeeTable(connection, responseTable);
+                                Home(connection);
+                                break;
+
+                            case 1: // See some stuff
+                                SeeStuff(connection);
+                                Home(connection);
+                                break;
+
+                            case 2:// Modify a table
+                                if (GetId(connection) == "bozo")
+                                {
+                                    Dialog text = new Dialog(
+                                        new List<string>()
+                                        {
+                                            "You don't have the rights to modify tables.",
+                                        },
+                                        null,
+                                        "Go back"
+                                        );
+                                    Window.AddElement(text);
+                                    Window.ActivateElement(text);
+                                    Home(connection);
+                                }
+                                ModifyTable(connection);
+                                Home(connection);
+                                break;
+                            case 3: // Demo
+                                Demo(connection);
+                                Home(connection);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                case Status.Escaped:
+                    break;
+
+                case Status.Deleted:
+                    break;
+                default:
+                    break;
+            }
+
+            Window.Close();
+            connection.Close();
+        }
 
         public static void Demo(MySqlConnection connection)
         {
@@ -55,8 +134,8 @@ namespace PB_MDD_A2
             Window.DeactivateAllElements();
             Window.Clear();
 
-            query = "SELECT c.nomClient, SUM(v.prixVelo) AS total_commande_euros FROM Client c JOIN commande cmd ON c.idClient = cmd.idClient JOIN passe_velo pv ON cmd.idCommande = pv.idCommande JOIN velo v ON pv.idVelo = v.idVelo GROUP BY c.nomClient; ";
-            headers = new List<string> { "Client", "Total" };
+            query = "SELECT prenomClient, nomClient, SUM(c.prixCommande) from client natural join commande c group by prenomClient, nomClient;";
+            headers = new List<string> { "Prenom", "Nom", "Total" };
             data = SelectFromCommand(connection, query);
             seeTable = new TableView("Spent money", headers, data);
             Window.AddElement(seeTable);
@@ -66,7 +145,7 @@ namespace PB_MDD_A2
             Window.Clear();
 
             query = query = "SELECT p.idPiece, p.refFournisseur, p.quantitePiece FROM pieces p WHERE p.quantitePiece <= 2;";
-            headers = new List<string> { "Part Id","Part ref", "Total" };
+            headers = new List<string> { "Part Id", "Part ref", "Total" };
             data = SelectFromCommand(connection, query);
             seeTable = new TableView("Low quantities parts", headers, data);
             Window.AddElement(seeTable);
@@ -75,78 +154,20 @@ namespace PB_MDD_A2
             Window.DeactivateAllElements();
             Window.Clear();
 
-            
-
-
-        }
-
-
-        public static void Home(MySqlConnection connection)
-        {
-
+            query = "select `nomEntreprise`, Count(f.`idPiece`) as total_count from fournisseur natural join fourni f group by `nomEntreprise` order by total_count Desc;";
+            headers = new List<string> { "Suppliers", "Total supplied goods"};
+            data = SelectFromCommand(connection, query);
+            seeTable = new TableView("Supplied good count", headers, data);
+            Window.AddElement(seeTable);
+            Window.Render(seeTable);
+            Window.Freeze();
             Window.DeactivateAllElements();
             Window.Clear();
 
-            Title title = new Title("VeloMax");
-            Window.AddElement(title);
-            Window.Render(title);
-            string[] options = ["Load from table", "See some stuff", "Modify a table", "Exit"];
-
-            ScrollingMenu menuMain = new ScrollingMenu(
-                "Please choose an option among those below.",
-                0,
-                Placement.TopCenter,
-                options
-            );
-            Window.AddElement(menuMain);
-            Window.ActivateElement(menuMain);
-
-            var response = menuMain.GetResponse();
-            Window.DeactivateElement(menuMain);
-
-            switch (response!.Status)
-            {
-                case Status.Selected:
-                    {
-                        switch (response!.Value)
-                        {
-                            case 0: // Load from table
-                                var responseTable = ChooseTable(connection);
-                                SeeTable(connection, responseTable);
-                                Home(connection);
-                                break;
-
-                            case 1: // See some stuff
-                                SeeStuff(connection);
-                                Home(connection);
-                                break;
-
-                            case 2:// Modify a table
-                                ModifyTable(connection);
-                                Home(connection);
-                                break;
-
-                            default:
-                                break;
-                        }
-                    }
-                    break;
-                case Status.Escaped:
-                    break;
-
-                case Status.Deleted:
-                    break;
-                default:
-                    break;
-            }
-
-            Window.Close();
-            connection.Close();
         }
-
-
         public static void ModifyTable(MySqlConnection connection)
         {
+
             string[] options = new string[] { "Insert into table", "Update from table", "Delete from table", "Go back" };
             ScrollingMenu menuModify = new ScrollingMenu(
                 "Please choose an option among those below.",
@@ -365,7 +386,7 @@ namespace PB_MDD_A2
                             headers = new List<string> { "Clients count" };
                             break;
                         case 1: // Clients spent money
-                            query = "SELECT c.nomClient, SUM(v.prixVelo) AS total_commande_euros FROM Client c JOIN commande cmd ON c.idClient = cmd.idClient JOIN passe_velo pv ON cmd.idCommande = pv.idCommande JOIN velo v ON pv.idVelo = v.idVelo GROUP BY c.nomClient; ";
+                            query = "SELECT prenomClient, nomClient, SUM(c.prixCommande) from client natural join commande c group by prenomClient, nomClient;";
                             headers = new List<string> { "Client", "Total" };
                             break;
 
@@ -378,7 +399,7 @@ namespace PB_MDD_A2
                             headers = new List<string> { "Supplier", "Parts quantities" };
                             break;
                         case 4: // Shops turnover
-                            query = "chiffre d'affaire par magasin SELECT v.idMagasin, SUM(c.prixCommande) AS chiffre_affaires_par_magasinFROM commande cJOIN Client cl ON c.idClient = cl.idClientJOIN vendeur v ON cl.idClient = v.idMagasinGROUP BY v.idMagasin;";
+                            query = "SELECT v.idMagasin, SUM(c.prixCommande) AS chiffre_affaires_par_magasinFROM commande cJOIN Client cl ON c.idClient = cl.idClientJOIN vendeur v ON cl.idClient = v.idMagasinGROUP BY v.idMagasin;";
                             headers = new List<string> { "Shop", "Turnover" };
                             break;
                         case 5: // Sales by employee // Y a une erreur dans la requête

@@ -19,7 +19,7 @@ namespace PB_MDD_A2
         }
 
         public static void DeleteFrom(MySqlConnection connection, string tableName, string idVal)
-        {
+        {   
             List<string> columns = Helper.GetColumnsName(connection, tableName);
             MySqlCommand command = connection.CreateCommand();
             command.CommandText = $"DELETE FROM {tableName} WHERE {columns[0]} = {idVal};";
