@@ -5,3 +5,6 @@ global using ConsoleAppVisuals.Enums;
 global using ConsoleAppVisuals.InteractiveElements;
 global using ConsoleAppVisuals.PassiveElements;
 global using ConsoleAppVisuals.AnimatedElements;
+global using static PB_MDD_A2.Helper;
+global using static PB_MDD_A2.Command;
+global using static PB_MDD_A2.Interface;

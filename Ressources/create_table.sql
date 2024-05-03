@@ -1,7 +1,13 @@
-#DROP DATABASE IF EXISTS `velomax`;
+DROP DATABASE IF EXISTS `velomax`;
+
+#DROP USER 'bozo'@'%';
 CREATE DATABASE IF NOT EXISTS `velomax` DEFAULT CHARACTER SET = 'utf8mb4';
 
 USE `velomax`;
+
+CREATE USER 'bozo'@'%' IDENTIFIED BY 'bozo';
+GRANT SELECT ON velomax.* TO 'bozo'@'%';
+FLUSH PRIVILEGES;
 
 #------------------------------------------------------------
 # Table: vendeur
