@@ -164,6 +164,35 @@ namespace PB_MDD_A2
             Window.DeactivateAllElements();
             Window.Clear();
 
+            query = "SELECT prenomClient, nomClient, 'Client' AS type FROM client UNION SELECT prenomVendeur, nomVendeur, 'Salesperson' AS type FROM vendeur;";
+            headers = new List<string> { "First name", "Surname", "Relation to VeloMax" };
+            data = SelectFromCommand(connection, query);
+            seeTable = new TableView("Contact list", headers, data);
+            Window.AddElement(seeTable);
+            Window.Render(seeTable);
+            Window.Freeze();
+            Window.DeactivateAllElements();
+            Window.Clear();
+
+            query = "SELECT m.idMagasin, SUM(c.prixCommande) AS chiffre_affaires FROM magasin m JOIN travaille t ON m.idMagasin = t.idMagasin JOIN vendeur v ON t.idVendeur = v.idVendeur JOIN commande c ON v.idVendeur = c.idVendeur GROUP BY m.idMagasin; ";
+            headers = new List<string> { "Shop Id", "Turnover"};
+            data = SelectFromCommand(connection, query);
+            seeTable = new TableView("Shops turnover", headers, data);
+            Window.AddElement(seeTable);
+            Window.Render(seeTable);
+            Window.Freeze();
+            Window.DeactivateAllElements();
+            Window.Clear();
+
+            query = "SELECT v.idVendeur, v.prenomVendeur, v.nomVendeur, SUM(c.prixCommande) AS ventes_generées FROM vendeur v  NATURAL JOIN commande c GROUP BY v.idVendeur;";
+            headers = new List<string> { "Saleperson Id", "First name", "Surname", "Turnover"};
+            data = SelectFromCommand(connection, query);
+            seeTable = new TableView("Sales by employees", headers, data);
+            Window.AddElement(seeTable);
+            Window.Render(seeTable);
+            Window.Freeze();
+            Window.DeactivateAllElements();
+            Window.Clear();
         }
         public static void ModifyTable(MySqlConnection connection)
         {
@@ -399,11 +428,11 @@ namespace PB_MDD_A2
                             headers = new List<string> { "Supplier", "Parts quantities" };
                             break;
                         case 4: // Shops turnover
-                            query = "SELECT v.idMagasin, SUM(c.prixCommande) AS chiffre_affaires_par_magasinFROM commande cJOIN Client cl ON c.idClient = cl.idClientJOIN vendeur v ON cl.idClient = v.idMagasinGROUP BY v.idMagasin;";
+                            query = "SELECT m.idMagasin, SUM(c.prixCommande) AS chiffre_affaires FROM magasin m JOIN travaille t ON m.idMagasin = t.idMagasin JOIN vendeur v ON t.idVendeur = v.idVendeur JOIN commande c ON v.idVendeur = c.idVendeur GROUP BY m.idMagasin;";
                             headers = new List<string> { "Shop", "Turnover" };
                             break;
                         case 5: // Sales by employee // Y a une erreur dans la requête
-                            query = "SELECT v.idVendeur, v.prenomVendeur, v.nomVendeur, v.SUM(c.prixCommande) AS chiffre_affaires_par_vendeurFROM commande c JOIN Client cl ON c.idClient = cl.idClient JOIN vendeur v ON cl.idClient = v.idVendeurGROUP BY v.idVendeur;";
+                            query = "SELECT v.idVendeur, v.prenomVendeur, v.nomVendeur, SUM(c.prixCommande) AS ventes_generées FROM vendeur v  NATURAL JOIN commande c GROUP BY v.idVendeur;";
                             headers = new List<string> { "Employee ID", "First name", "Surname", "Turnover" };
                             break;
                         case 6: // Sold item quantities
@@ -419,7 +448,7 @@ namespace PB_MDD_A2
                             headers = new List<string> { "Employee ID", "Item ID", "Quantity sold" };
                             break;
                         case 9: // Sold fidelity programms
-                            query = "SELECT idProgramme, libelle, COUNT(*) AS nombre_de_membres FROM Client GROUP BY idProgramme;";
+                            query = "SELECT idProgramme, p.libelle, COUNT(*) AS nombre_de_membres FROM Client Natural join programme p GROUP BY idProgramme;";
                             headers = new List<string> { "Program ID", "Label", "Members count" };
                             break;
                         case 10: // Fidelity programms expiration date

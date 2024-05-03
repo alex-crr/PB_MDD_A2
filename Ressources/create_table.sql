@@ -85,16 +85,17 @@ CREATE TABLE IF NOT EXISTS Client (
 # Table: commande
 #------------------------------------------------------------
 
-CREATE TABLE IF NOT EXISTS commande (
-    idCommande INT NOT NULL AUTO_INCREMENT, 
-    dateCommande DATE NOT NULL, 
-    dateLivraison DATE NOT NULL, 
-    idClient INT NOT NULL, 
-    prixCommande Int NOT NULL, 
-    CONSTRAINT commande_PK PRIMARY KEY (idCommande), 
-    CONSTRAINT commande_Client_FK FOREIGN KEY (idClient) REFERENCES Client (idClient) ON DELETE CASCADE
+CREATE TABLE if not exists commande(
+        idCommande    Int NOT NULL ,
+        dateCommande  Date NOT NULL ,
+        dateLivraison Date NOT NULL ,
+        idClient      Int NOT NULL,
+        prixCommande Int NOT NULL,
+        idVendeur Int NOT NULL,
+    CONSTRAINT commande_PK PRIMARY KEY (idCommande),
+    CONSTRAINT commande_Client_FK FOREIGN KEY (idClient) REFERENCES Client(idClient),
+    CONSTRAINT commande_Vendeur_FK FOREIGN KEY (idVendeur) REFERENCES vendeur (idVendeur)
 );
-
 #------------------------------------------------------------
 # Table: ligne_produit
 #------------------------------------------------------------
@@ -195,6 +196,7 @@ CREATE TABLE IF NOT EXISTS possede (
 #------------------------------------------------------------
 # Table: Travaille
 #------------------------------------------------------------
+
 CREATE TABLE IF NOT EXISTS travaille (
     idVendeur INT NOT NULL, 
     idMagasin INT NOT NULL, 
@@ -391,14 +393,14 @@ VALUES (1, 'Goldman', 'Jean-Jacques', 'place de la république', '2023-01-01', 1
     (3, 'Jackson', 'Michael', 'place de la nation', '2023-03-01', 3),
     (4, 'Lee', 'Bruce', 'Tokyo', '2023-04-01', 4);
 
-INSERT INTO commande (idCommande, dateCommande, dateLivraison, idClient, prixCommande)
-VALUES (1, '2023-01-01', '2023-01-15', 1, 150),
-    (2, '2023-02-01', '2023-02-15', 2, 250),
-    (3, '2023-03-01', '2023-03-15', 3, 350),
-    (4, '2023-04-01', '2023-04-15', 4, 450),
-    (6, '2023-06-01', '2023-06-15', 1, 650),
-    (7, '2023-07-01', '2023-07-15', 2, 750),
-    (8, '2023-08-01', '2023-08-15', 3, 850);
+INSERT INTO commande (idCommande, dateCommande, dateLivraison, idClient, prixCommande, idVendeur)
+VALUES (1, '2023-01-01', '2023-01-15', 1, 150,1),
+    (2, '2023-02-01', '2023-02-15', 2, 250,2),
+    (3, '2023-03-01', '2023-03-15', 3, 350,3),
+    (4, '2023-04-01', '2023-04-15', 4, 450,1),
+    (6, '2023-06-01', '2023-06-15', 1, 650,2),
+    (7, '2023-07-01', '2023-07-15', 2, 750,5),
+    (8, '2023-08-01', '2023-08-15', 3, 8501,2);
 
 INSERT INTO fourni (idPiece, SIRET)
 Values (1, 1),
