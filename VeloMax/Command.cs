@@ -72,8 +72,27 @@ namespace PB_MDD_A2
             }
             reader.Close();
             return tableData;
+        }
 
+        public static List<List<string>> SelectFromCommand(MySqlConnection connection, string commandText)
+        {
+            MySqlCommand commandShow = connection.CreateCommand();
+            commandShow.CommandText = commandText;
+            MySqlDataReader reader = commandShow.ExecuteReader();
 
+            List<List<string>> tableData = new List<List<string>>();
+            while (reader.Read())
+            {
+                List<string> rowData = new List<string>();
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    string valueAsString = reader.GetValue(i).ToString();
+                    rowData.Add(valueAsString);
+                }
+                tableData.Add(rowData);
+            }
+            reader.Close();
+            return tableData;
         }
 
     }

@@ -5,10 +5,6 @@ CREATE DATABASE IF NOT EXISTS `velomax` DEFAULT CHARACTER SET = 'utf8mb4';
 
 USE `velomax`;
 
-CREATE USER 'bozo'@'%' IDENTIFIED BY 'bozo';
-GRANT SELECT ON velomax.* TO 'bozo'@'%';
-FLUSH PRIVILEGES;
-
 #------------------------------------------------------------
 # Table: vendeur
 #------------------------------------------------------------
@@ -22,7 +18,7 @@ CREATE TABLE IF NOT EXISTS vendeur (
 #------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS pieces (
-    idPiece INT NOT NULL AUTO_INCREMENT, descriptionPiece VARCHAR(50) NOT NULL, debutPiece DATE NOT NULL, finPiece DATE NOT NULL, delaiPiece INT NOT NULL, CONSTRAINT pieces_PK PRIMARY KEY (idPiece)
+    idPiece INT NOT NULL AUTO_INCREMENT, quantitePiece INT NOT NULL DEFAULT 0, descriptionPiece VARCHAR(50) NOT NULL, debutPiece DATE NOT NULL, finPiece DATE NOT NULL, delaiPiece INT NOT NULL, CONSTRAINT pieces_PK PRIMARY KEY (idPiece)
 );
 
 #------------------------------------------------------------

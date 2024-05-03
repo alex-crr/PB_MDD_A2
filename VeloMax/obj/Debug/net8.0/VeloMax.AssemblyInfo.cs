@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VeloMax")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d507367cbeac594d9312ad325cb5851601dd7a78")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+403a6101858781f94fef894d1718f291f9c545af")]
 [assembly: System.Reflection.AssemblyProductAttribute("VeloMax")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VeloMax")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
