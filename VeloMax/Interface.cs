@@ -1,5 +1,4 @@
 using System;
-using ZstdSharp.Unsafe;
 
 
 namespace PB_MDD_A2
@@ -7,6 +6,81 @@ namespace PB_MDD_A2
 {
     public class Interface
     {
+
+        public static void Demo(MySqlConnection connection)
+        {
+            Window.Open();
+            Title title = new Title("VeloMax");
+            Window.AddElement(title);
+            Window.Render(title);
+            SeeTable(connection, tableName: "client");
+            Window.DeactivateAllElements();
+            Window.Clear();
+
+            string query = "INSERT INTO client  (idClient, nomClient, prenomClient, adresseClient, creaFidelite, idProgramme) VALUES (5, 'Federer', 'Roger', 'Paris', '2023-01-01', 4);";
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = query;
+            command.ExecuteNonQuery();
+
+            SeeTable(connection, tableName: "client");
+            Window.DeactivateAllElements();
+            Window.Clear();
+
+            query = "UPDATE client SET nomClient = 'Nadal' WHERE idClient = 5;";
+            command = connection.CreateCommand();
+            command.CommandText = query;
+            command.ExecuteNonQuery();
+
+            SeeTable(connection, tableName: "client");
+            Window.DeactivateAllElements();
+            Window.Clear();
+
+            query = "DELETE FROM client WHERE idClient = 5;";
+            command = connection.CreateCommand();
+            command.CommandText = query;
+            command.ExecuteNonQuery();
+
+            SeeTable(connection, tableName: "client");
+            Window.DeactivateAllElements();
+            Window.Clear();
+
+            query = "SELECT COUNT(*) FROM client;";
+            var headers = new List<string> { "Clients count" };
+            var data = SelectFromCommand(connection, query);
+
+            TableView seeTable = new TableView("Total clients", headers, data);
+            Window.AddElement(seeTable);
+            Window.Render(seeTable);
+            Window.Freeze();
+            Window.DeactivateAllElements();
+            Window.Clear();
+
+            query = "SELECT c.nomClient, SUM(v.prixVelo) AS total_commande_euros FROM Client c JOIN commande cmd ON c.idClient = cmd.idClient JOIN passe_velo pv ON cmd.idCommande = pv.idCommande JOIN velo v ON pv.idVelo = v.idVelo GROUP BY c.nomClient; ";
+            headers = new List<string> { "Client", "Total" };
+            data = SelectFromCommand(connection, query);
+            seeTable = new TableView("Spent money", headers, data);
+            Window.AddElement(seeTable);
+            Window.Render(seeTable);
+            Window.Freeze();
+            Window.DeactivateAllElements();
+            Window.Clear();
+
+            query = query = "SELECT p.idPiece, p.refFournisseur, p.quantitePiece FROM pieces p WHERE p.quantitePiece <= 2;";
+            headers = new List<string> { "Part Id","Part ref", "Total" };
+            data = SelectFromCommand(connection, query);
+            seeTable = new TableView("Low quantities parts", headers, data);
+            Window.AddElement(seeTable);
+            Window.Render(seeTable);
+            Window.Freeze();
+            Window.DeactivateAllElements();
+            Window.Clear();
+
+            
+
+
+        }
+
+
         public static void Home(MySqlConnection connection)
         {
 
@@ -124,11 +198,25 @@ namespace PB_MDD_A2
 
         }
 
-        public static void SeeTable(MySqlConnection connection, (string[], ConsoleAppVisuals.Models.InteractionEventArgs<int>) responseTable)
+        public static void SeeTable(MySqlConnection connection, (string[], ConsoleAppVisuals.Models.InteractionEventArgs<int>) responseTable = default, string tableName = "")
         {
-            string tableName = responseTable.Item1[responseTable!.Item2.Value];
-            var data = Select(connection, tableName);
-            var headers = GetColumnsName(connection, tableName);
+            if (responseTable == default && tableName == "")
+            {
+                throw new ArgumentException("Either responseTable or tableName must be provided.");
+            }
+            List<List<string>>? data = new List<List<string>>();
+            List<string>? headers = new List<string>();
+            if (responseTable != default)
+            {
+                tableName = responseTable.Item1[responseTable!.Item2.Value];
+                data = Select(connection, tableName);
+                headers = GetColumnsName(connection, tableName);
+            }
+            if (tableName != "")
+            {
+                data = Select(connection, tableName);
+                headers = GetColumnsName(connection, tableName);
+            }
 
             TableView seeTable = new TableView(tableName, headers, data);
             Window.AddElement(seeTable);
@@ -250,7 +338,7 @@ namespace PB_MDD_A2
         public static void SeeStuff(MySqlConnection connection)
         {
             string[] options = new string[] { "Clients count", "Clients spent money", "Spare parts in low quantities",
-            "Spare parts count", "Shops turnover", "Sales by employee", "Sold item quantities", "Sold item quantities by shops", 
+            "Spare parts count", "Shops turnover", "Sales by employee", "Sold item quantities", "Sold item quantities by shops",
             "Sold Item quantities by salesperson", "Sold fidelity programms", "Fidelity programms expiration date",
             "Average order price", "Average parts per command", "Average bike number per command", "Go back"};
 
@@ -332,7 +420,7 @@ namespace PB_MDD_A2
                         default:
                             Home(connection);
                             break;
-                        
+
 
                     }
 

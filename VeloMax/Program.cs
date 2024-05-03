@@ -50,7 +50,8 @@ namespace PB_MDD_A2
                 goto Login;
             }
 
-            Home(connection);
+            Demo(connection);
+            //Home(connection);
         }
     }
 }
